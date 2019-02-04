@@ -73,7 +73,7 @@ int main(int argc, char** argv){
 	glutCreateWindow("Checkerboard");
 	init(size);
 	checkerboard(size);
-  //diamond(4*size, 4*size, 50);
+  diamond(4*size, 4*size, 50);
 	glutMainLoop();
 	return 0;   /* ANSI C requires main to return int. */
 }
