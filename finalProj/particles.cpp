@@ -2,6 +2,7 @@
 #include <time.h>
 #include <math.h>
 #include <unistd.h>
+#include <iostream>
 
 class Particle{
 private:
@@ -11,21 +12,24 @@ public:
     glColor3f(1,1,1);
     x = _x;
     y = _y;
-    vx = vy = 0.2;
+    vx = 3;
+    vy = 0;
     r = g = b = 1.0f;
-    rad = 3;
+    rad = 15;
     mass = rad;
+    std::cout << "test 2 p const\n";
   }
   void display(void){
     x += vx;
     y += vy;
     glBegin(GL_POLYGON);
-    for(int angle=0; angle<20; angle++){
-      float radangle = (360/20)*angle*M_PI/180.0;
+    for(int angle=0; angle<40; angle++){
+      float radangle = (360/40)*angle*M_PI/180.0;
       glVertex2f(x + rad*cos(radangle), y + rad*sin(radangle));
     }
-    glFlush();
     glEnd();
+    glutSwapBuffers();
+    glClear(GL_COLOR_BUFFER_BIT);
   }
   float getMass(){
     return mass;
@@ -65,29 +69,32 @@ public:
 class P_system{
 private:
   Particle* particles;
-  int l, r, b, t;
+  int l, r, b, t, np;
 public:
-  P_system(int _l, int _r, int _b, int _t){
+  P_system(int _l, int _r, int _b, int _t, int numParticles){
     l=_l;
     r=_r;
     b=_b;
     t=_t;
+    np = numParticles;
+    std::cout << "test 1 psys const\n";
     particles = (Particle*)malloc(2*sizeof(Particle));
-    particles[0] = Particle(10,10);
-    particles[1] = Particle(10,1270);
+    particles[0] = Particle(20, 20);
+    particles[1] = Particle(20, 700);
   }
   void display(){
-    for(int i=0; i<sizeof(particles); i++){
+    for(int i=0; i<np; i++){
+      std::cout << "test 3 b4 getbounds\n";
       float* bounds = particles[i].getBounds();
+      std::cout << "test 4 after\n";
       if(bounds[0]<l || bounds[1]>r) particles[i].setVel(-particles[i].getVel()[0], particles[i].getVel()[1]);
       if(bounds[2]<b || bounds[3]>t) particles[i].setVel(particles[i].getVel()[0], -particles[i].getVel()[1]);
       particles[i].display();
     }
-    //glutSwapBuffers();
   }
 };
 
-P_system psystem(0, 1280, 0, 720);
+P_system psystem(0, 1280, 0, 720, 2);
 void dispSys(){
   psystem.display();
 }
@@ -102,13 +109,13 @@ void init()
 int main(int argc, char** argv){
   srand(time(NULL));
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(1280, 720);
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow("Checkerboard");
 	init();
   glutDisplayFunc(dispSys);
-	glutMainLoop();
   usleep(400000);
+	glutMainLoop();
 	return 0;   /* ANSI C requires main to return int. */
 }
