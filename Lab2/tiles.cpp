@@ -1,6 +1,7 @@
 #include <GL/glut.h>
 #include <math.h>
 #include <time.h>
+#include <unistd.h>
 
 int size = 1000;
 
