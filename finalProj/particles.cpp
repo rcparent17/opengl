@@ -12,8 +12,8 @@ public:
     glColor3f(1,1,1);
     x = _x;
     y = _y;
-    vx = 3;
-    vy = 0;
+    vx = rand()%(10+1-5)+5;
+    vy = rand()%(10+1-5)+5;
     r = g = b = 1.0f;
     rad = 15;
     mass = rad;
@@ -29,11 +29,11 @@ public:
     }
     glEnd();
     glutSwapBuffers();
-    glClear(GL_COLOR_BUFFER_BIT);
   }
   float getMass(){
     return mass;
   }
+  float getRad(){return rad;}
   void setVel(float _vx, float _vy){
     vx=_vx;
     vy=_vy;
@@ -50,6 +50,12 @@ public:
     arr[1] = x+rad;
     arr[2] = y-rad;
     arr[3] = y+rad;
+    return arr;
+  }
+  float* getPos(){
+    float* arr = (float*)malloc(2*sizeof(float));
+    arr[0] = x;
+    arr[1] = y;
     return arr;
   }
   void collide(Particle* p2){
@@ -78,9 +84,10 @@ public:
     t=_t;
     np = numParticles;
     std::cout << "test 1 psys const\n";
-    particles = (Particle*)malloc(2*sizeof(Particle));
-    particles[0] = Particle(20, 20);
-    particles[1] = Particle(20, 700);
+    particles = (Particle*)malloc(np*sizeof(Particle));
+    for(int i = 0; i<np; i++){
+      particles[i] = Particle(rand()%(1260+1-20)+20,rand()%(720+1-20)+20);
+    }
   }
   void display(){
     for(int i=0; i<np; i++){
@@ -90,13 +97,25 @@ public:
       if(bounds[0]<l || bounds[1]>r) particles[i].setVel(-particles[i].getVel()[0], particles[i].getVel()[1]);
       if(bounds[2]<b || bounds[3]>t) particles[i].setVel(particles[i].getVel()[0], -particles[i].getVel()[1]);
       particles[i].display();
+      for(int j=0; j<np; j++){
+        float* iPos = particles[i].getPos();
+        float* jPos = particles[j].getPos();
+        float distance = sqrt(pow(jPos[0]-iPos[0],2) + pow(jPos[1]-iPos[1],2));
+        if(distance<=particles[i].getRad()+particles[j].getRad()){
+          particles[i].collide(&particles[j]);
+        }
+      }
     }
   }
 };
 
-P_system psystem(0, 1280, 0, 720, 2);
+P_system psystem(0, 1280, 0, 720, 5);
 void dispSys(){
-  psystem.display();
+  while(1){
+    glClear(GL_COLOR_BUFFER_BIT);
+    psystem.display();
+    usleep(20000);
+  }
 }
 void init()
 {
@@ -115,7 +134,6 @@ int main(int argc, char** argv){
 	glutCreateWindow("Checkerboard");
 	init();
   glutDisplayFunc(dispSys);
-  usleep(400000);
 	glutMainLoop();
 	return 0;   /* ANSI C requires main to return int. */
 }

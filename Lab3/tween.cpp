@@ -14,6 +14,7 @@ float lerp(float a, float b, float t)
 }
 
 void tween(void){
+  while(1){
   if(t>=1.0) direction = -1.0;
   if(t<=0.0) direction = 1.0;
     glBegin(GL_LINE_STRIP);
@@ -26,7 +27,8 @@ void tween(void){
     glutSwapBuffers();
     glClear(GL_COLOR_BUFFER_BIT);
     t+=(direction*inc);
-    usleep(400000);
+    usleep(40000);
+  }
   }
 
 int main(int argc, char** argv){
@@ -38,7 +40,6 @@ int main(int argc, char** argv){
   glMatrixMode(GL_PROJECTION);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
   gluOrtho2D(0, 600, 0, 600);
-  
 	glutDisplayFunc(tween);
 	glutMainLoop();
 	return 0;   /* ANSI C requires main to return int. */
