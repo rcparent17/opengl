@@ -12,14 +12,15 @@ public:
     glColor3f(1,1,1);
     x = _x;
     y = _y;
-    vx = rand()%(10+1-5)+5;
-    vy = rand()%(10+1-5)+5;
-    r = g = b = 1.0f;
-    rad = 15;
-    mass = rad;
-    std::cout << "test 2 p const\n";
+    vx = rand()%(10+1-1)+1;
+    vy = rand()%(10+1-1)+1;
+    r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    mass = rad = rand()%(25+1-5)+5;
   }
   void display(void){
+    glColor3f(r,g,b);
     x += vx;
     y += vy;
     glBegin(GL_POLYGON);
@@ -28,7 +29,7 @@ public:
       glVertex2f(x + rad*cos(radangle), y + rad*sin(radangle));
     }
     glEnd();
-    glutSwapBuffers();
+    //glutSwapBuffers();
   }
   float getMass(){
     return mass;
@@ -75,7 +76,8 @@ public:
 class P_system{
 private:
   Particle* particles;
-  int l, r, b, t, np;
+  int l, r, b, t, np, wTime, wCountX, wCountY;
+  bool wCollX, wCollY;
 public:
   P_system(int _l, int _r, int _b, int _t, int numParticles){
     l=_l;
@@ -83,19 +85,29 @@ public:
     b=_b;
     t=_t;
     np = numParticles;
-    std::cout << "test 1 psys const\n";
+    wTime = 5;
+    wCountX = 0;
+    wCountY = 0;
+    wCollX = true;
+    wCollY = true;
     particles = (Particle*)malloc(np*sizeof(Particle));
     for(int i = 0; i<np; i++){
-      particles[i] = Particle(rand()%(1260+1-20)+20,rand()%(720+1-20)+20);
+      particles[i] = Particle(rand()%(1260+1-20)+20,rand()%(700+1-20)+20);
     }
   }
   void display(){
     for(int i=0; i<np; i++){
-      std::cout << "test 3 b4 getbounds\n";
       float* bounds = particles[i].getBounds();
-      std::cout << "test 4 after\n";
-      if(bounds[0]<l || bounds[1]>r) particles[i].setVel(-particles[i].getVel()[0], particles[i].getVel()[1]);
-      if(bounds[2]<b || bounds[3]>t) particles[i].setVel(particles[i].getVel()[0], -particles[i].getVel()[1]);
+      if((bounds[0]<l || bounds[1]>r) && !wCollX){
+        particles[i].setVel(-particles[i].getVel()[0], particles[i].getVel()[1]);
+        wCollX = true;
+      }
+      if((bounds[2]<b || bounds[3]>t) && !wCollY){
+        particles[i].setVel(particles[i].getVel()[0], -particles[i].getVel()[1]);
+        wCollY = true;
+      }
+      if(wCollX && wCountX++ >= wTime){ wCollX = false; wCountX = 0;}
+      if(wCollY && wCountY++ >= wTime){ wCollY = false; wCountY = 0;}
       particles[i].display();
       for(int j=0; j<np; j++){
         float* iPos = particles[i].getPos();
@@ -109,12 +121,13 @@ public:
   }
 };
 
-P_system psystem(0, 1280, 0, 720, 5);
+P_system psystem(0, 1280, 0, 720, 50);
 void dispSys(){
   while(1){
     glClear(GL_COLOR_BUFFER_BIT);
     psystem.display();
-    usleep(20000);
+    glutSwapBuffers();
+    usleep(30000);
   }
 }
 void init()
